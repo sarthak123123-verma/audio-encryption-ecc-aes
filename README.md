@@ -1,86 +1,95 @@
 # Audio Encryption System — ECC + AES Hybrid Cryptography
 
-A Python-based hybrid encryption system that combines AES-256 symmetric encryption with Elliptic Curve Diffie-Hellman (ECDH) key exchange to securely encrypt and decrypt WAV audio files.
+A Python-based hybrid cryptography project combining **AES-256-CFB** for audio encryption with **ECDH** using the **brainpoolP256r1** elliptic curve for AES key establishment.
 
 ## Overview
 
-This project demonstrates a hybrid cryptographic architecture similar to the approach used in modern secure communication protocols.
+This project explores how symmetric and elliptic-curve cryptography can be combined to securely process binary audio data.
 
-The system combines:
+AES-256 is used for efficient encryption of the audio data, while ECDH is used to derive shared secret material for protecting the AES key.
 
-- AES-256 for symmetric data encryption
-- ECDH for asymmetric key exchange
-- Ephemeral ECC key pairs for forward secrecy
-- WAV file processing for lossless audio encryption and decryption
-
-## Cryptographic Architecture
-
-The encryption pipeline uses:
+## Architecture
 
 ```text
-Input WAV
-    │
-    ▼
-AES-256 Encryption
-    │
-    ▼
-Encrypted Audio
-    │
-    │
-    └── AES key established through ECDH
-              │
-              ▼
-        Ephemeral ECC Keys
+                Input WAV
+                    │
+                    ▼
+              AES-256-CFB
+                    │
+                    ▼
+            Encrypted Audio
+                    │
+                    │
+                    ▼
+          ECDH — brainpoolP256r1
+                    │
+                    ▼
+             Shared Secret
+                    │
+                    ▼
+            AES Key Protection
+                    │
+                    ▼
+          Encrypted Key + Metadata
 
-The use of ephemeral ECC key pairs means a new key exchange can be performed for each session, providing forward secrecy.
+During decryption, the ECDH shared secret is reconstructed using the recipient’s private key and the ephemeral public key, allowing the AES key to be recovered and the original audio to be reconstructed.
 
-Technologies Used
+Key Features
+
+* AES-256-CFB encryption for WAV audio data
+* ECDH key establishment using brainpoolP256r1
+* Fresh ephemeral ECC key pair for each encryption session
+* Binary audio encryption and reconstruction
+* Bit-for-bit validation of decrypted output
+
+Technologies
 
 * Python
-* AES-256
+* AES-256-CFB
 * ECDH
 * Elliptic Curve Cryptography
 * brainpoolP256r1
-* WAV audio processing
+* cryptography
+* tinyec
+* wave
 
 Project Structure
 
 audio_ecc_project/
 ├── encrypt.py
 ├── decrypt.py
-├── params.txt
-├── input.wav
-├── encrypted_audio.bin
-├── encrypted_key.bin
-└── output.wav
+├── README.md
+└── requirements.txt
 
 encrypt.py
 
-Handles the encryption process and generation of the encrypted output.
+Handles AES encryption, ECC key generation, ECDH shared-secret computation, and encrypted output generation.
 
 decrypt.py
 
-Handles decryption and reconstruction of the original audio file.
+Reconstructs the shared secret, recovers the AES key, decrypts the audio, and reconstructs the WAV file.
 
 Validation
 
-The decrypted WAV file was compared against the original input using structured output comparison.
+The decrypted WAV output was compared against the original input and validated as bit-for-bit identical, confirming correct and lossless recovery through the implemented encryption/decryption pipeline.
 
-The decrypted output was validated as bit-for-bit identical to the original WAV file, confirming lossless recovery.
+Security Considerations
 
-Key Concepts Demonstrated
+This is an educational implementation, not a production cryptosystem.
 
-* Hybrid cryptography
-* Symmetric encryption
-* Elliptic Curve Cryptography
-* ECDH key exchange
-* Forward secrecy
-* Secure key management
-* Binary file encryption
-* Data integrity validation
+The current version:
 
-Purpose
+* Uses XOR-based AES key protection rather than a dedicated KDF such as HKDF.
+* Uses AES-CFB, which does not provide authenticated encryption.
+* Uses simplified private-key storage for demonstration purposes.
+* Does not authenticate the ECDH key exchange.
 
-This project was developed to understand how symmetric and asymmetric cryptographic techniques can be combined into a practical secure communication architecture.
+These are deliberate areas for future improvement rather than claims of production security.
 
-The design was influenced by the hybrid cryptographic model used in TLS/SSL.
+Future Improvements
+
+* HKDF-based key derivation
+* AES-GCM authenticated encryption
+* Authenticated ECDH
+* Secure private-key management
+* Safer metadata serialization
